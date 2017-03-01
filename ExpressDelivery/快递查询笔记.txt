@@ -1,0 +1,139 @@
+快递查询 17:21 2017/3/1
+
+1.准备
+	快递API
+	快递单号
+2.输入框、按钮
+	快递查询
+index:
+    添加输入框:
+    index.wxml
+        <view class="container">
+            <input placeholder="请输入运单号"/>	
+        </view>
+    调整样式：
+    index.wxss
+        input{
+            border:1px solid red;
+            width:90%;
+            margin:5%;
+            padding:5px;
+        }	
+    添加按钮:
+    index.wxml
+	<view class="container">
+		<input placeholder="请输入运单号"/>
+		<button type="primary">
+			查询
+		</button>
+	</view>
+
+api网络请求接口
+获得快递信息
+app.js
+    nu--快递单号
+    cb--回调函数
+    getExpressInfo:function(num,cb){
+        var key = 'xxxxxxxxxxx';    //写上申请API的key值
+        var com = 'YD';             //快递公司编号
+        wx.request({
+            url: 'http://v.juhe.cn/exp/index?key='+key+'&com='+com+'&no='+num, //请求的API接口
+            data: {
+            },
+            method: 'GET',
+            header: {
+                'content-type': 'application/json'
+            },
+            //收到开发者服务成功返回的回调函数，res = {data: '开发者服务器返回的内容'}
+            success: function(res) {
+                //console.log(res.data)
+                cb(res.data)
+            }
+            fail: function(res){
+                console.log(res.data)
+            }
+        })
+    },
+
+给按钮绑定点击事件,调用API函数。
+    index.wxml
+	<button type="primary" bindtap="btnClick">
+        查询
+	</button>	
+    index.js
+    var app = getApp()
+	btnClick: function(){
+        //在xxxxx写上快递单号
+		app.getExpressInfo('xxxxx',function(data){
+			console.log(data)
+		})
+	}
+    这样就能够看到快递信息，打印出来了。
+如何动态获取输入框中的数据？
+绑定input事件(bindinput)
+	<input placeholder="请输入运单号" bindinput="input"/>
+index.js
+	input:function(e){
+		console.log(e)
+	}
+	在输入框输入数据，会打印相应的数据。
+
+	获取输入框里输入的数据
+    在data里定义一个变量expressNu
+	data:{
+		expressNu: null
+	}
+    使用this.setData()将获取到的输入框数据存储到expressNu中，也就是获得的快递单号。
+	input:function(e){
+        //console.log(e)
+        this.setData({expressNu:e.detail.value})
+	}
+	点击按钮，把输入框里的数据(快递单号)打印出来，并将请求到的快递信息也打印出来。
+	btnClick: function(){
+		console.log(this.data.expressNu)
+		app.getExpressInfo(this.data.expressNu,function(data){
+			console.log(data)
+		})
+	}
+	
+将上面的快递信息存储并显示出来
+    index.js
+    在data里定义一个变量 expressInfo
+    data:{
+		expressNu: null,
+		expressInfo: null
+	}
+    将获得的快递信息存到变量 expressInfo中
+    btnClick: function(){
+		//console.log(this.data.expressNu)
+        //this对象在程序中随时会改变，而var that = this之后，
+        //that 没改变之前仍然是指向当时的this
+		var that = this;
+		app.getExpressInfo(this.data.expressNu,function(data){
+			console.log(data)
+			that.setData({expressInfo:data})
+		})
+	}
+    调试过程，在AppData和console中观察获得信息结构。
+    index.wxml
+    	<view wx:for="{{expressInfo.result.list}}">
+            {{item.remark}} 【{{item.datetime}}】
+        </view>
+	这样可以列出所有的信息。
+	为了方便好看(滚动信息)，使用组件<scroll-view> </scroll-view>将<view></view>包裹即可。
+        <scroll-view scroll-y="true" style="height: 200px;">
+            <view wx:for="{{expressInfo.result.list}}">
+                {{item.remark}} 【{{item.datetime}}】
+            </view>
+        </scroll-view>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
