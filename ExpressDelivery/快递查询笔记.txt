@@ -49,9 +49,6 @@ app.js
                 //console.log(res.data)
                 cb(res.data)
             }
-            fail: function(res){
-                console.log(res.data)
-            }
         })
     },
 
