@@ -1,2 +1,3 @@
 ## wechatAppletNotes
-ExpressDelivery--快递查询笔记.txt 快递查询 17:21 2017/3/1
+ExpressDelivery--快递查询笔记.txt 2017/3/1
+               --页面的生命周期与参数传递笔记.txt 2017/3/2
