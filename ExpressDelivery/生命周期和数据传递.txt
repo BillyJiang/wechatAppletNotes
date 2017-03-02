@@ -1,0 +1,211 @@
+微信小程序页面的生命周期与参数传递
+	页面的生命周期
+	页面跳转的数据传递
+1.了解页面的生命周期(利用quickstart项目)
+index.wxml
+    <view class="container">
+        <view class="usermotto">
+            <text class="user-motto" >文章1</text>
+        </view>
+        <view class="usermotto">
+            <text class="user-motto">文章2</text>
+        </view>
+    </view>
+    
+index.js
+Page({
+  data:{
+    
+  },
+  onLoad:function(options){
+    // 生命周期函数--监听页面加载
+    console.log("index onLoad")
+  },
+  onReady:function(){
+    // 生命周期函数--监听页面初次渲染完成
+    console.log("index onReady")
+  },
+  onShow:function(){
+    // 生命周期函数--监听页面显示
+    console.log("index onShow")
+  },
+  onHide:function(){
+    // 生命周期函数--监听页面隐藏
+    console.log("index onHide")
+  },
+  onUnload:function(){
+    // 生命周期函数--监听页面卸载
+    console.log("index onUnload")
+  },
+  onPullDownRefresh: function() {
+    // 页面相关事件处理函数--监听用户下拉动作
+    String7
+  },
+  onReachBottom: function() {
+    // 页面上拉触底事件的处理函数
+    String8
+  },
+  onShareAppMessage: function() {
+    // 用户点击右上角分享
+    return {
+      title: 'title', // 分享标题
+      desc: 'desc', // 分享描述
+      path: 'path' // 分享路径
+    }
+  }
+})
+logs.js
+Page({
+  data:{
+    
+  },
+  onLoad:function(options){
+    // 生命周期函数--监听页面加载
+    console.log("log onLoad")
+  },
+  onReady:function(){
+    // 生命周期函数--监听页面初次渲染完成
+    console.log("log onReady")
+  },
+  onShow:function(){
+    // 生命周期函数--监听页面显示
+    console.log("log onShow")
+  },
+  onHide:function(){
+    // 生命周期函数--监听页面隐藏
+    console.log("log onHide")
+  },
+  onUnload:function(){
+    // 生命周期函数--监听页面卸载
+    console.log("log onUnload")
+  },
+  onPullDownRefresh: function() {
+    // 页面相关事件处理函数--监听用户下拉动作
+    String7
+  },
+  onReachBottom: function() {
+    // 页面上拉触底事件的处理函数
+    String8
+  },
+  onShareAppMessage: function() {
+    // 用户点击右上角分享
+    return {
+      title: 'title', // 分享标题
+      desc: 'desc', // 分享描述
+      path: 'path' // 分享路径
+    }
+  }
+})
+
+App.js
+App({
+  onLaunch: function () {
+    console.log("app onLaunch")
+  },
+  onShow: function () {
+    console.log("app onShow")
+  },
+  onHide: function () {
+    console.log("app onHide")
+  },
+  onError: function (msg) {
+    String4
+  }
+})
+重启一下项目，将会打印下面信息。
+    app onLaunch
+    app onShow
+    index onLoad
+    index onShow
+    index onReady
+
+有两个线程(View Thread/AppService Thread)组成,互相配合。
+View Thread                 AppService Thread        
+初始化状态                   初始化状态(初始化完毕后,调用自定义的onload、onshow)
+    |   ViewThreadInited完成     |
+    |   -----------------> 等待激活状态
+    |   发送初始化数据           |
+  首次  <--------------------    |
+渲染状态                         |  
+    |                            | 
+    |                            |
+    |    首次渲染完成            |
+    |----------------------> 激活状态(调用自定义的onReady()函数)    
+    |                        此状态下就可以通过 this.setData 函数
+    |                        发送界面数据给界面线程进行局部渲染，更新页面。
+    |                            |
+    |   发送this.setData()数据   |
+  持续  <--------------------    |
+  渲染   发送this.setData()数据  |
+  状态  <--------------------  后台状态(界面进入后台，服务线程就进入后台运行状态)  
+    |                            |
+   END                           END
+
+2.页面跳转的数据传递    
+在View上添加点击事件，跳转到另外一个页面。
+<view bindtap="itemClick">
+    <text class="user-motto"> 文章2</text>
+</view>
+使用navigateTo跳转到logs页面。
+itemClick: function(){
+    wx.navigateTo({
+      url: '../logs/logs',
+      success: function(res){
+        // success
+      },
+      fail: function() {
+        // fail
+      },
+      complete: function() {
+        // complete
+      }
+    })
+  }
+使用 redirectTo 跳转到logs页面(会调用onUnload方法,将会卸载之前的页面)  
+  wx.redirectTo({
+      url: '../logs/logs',
+      success: function(res){
+        // success
+      },
+      fail: function() {
+        // fail
+      },
+      complete: function() {
+        // complete
+      }
+    })
+
+如何将一个页面的参数带到另外一个页面上？
+    参数传递，更改上面url:
+        url: '../logs/log?id=1'
+logs.js
+    页面加载时，新的页面会调用onLoad方法。onLoad的function有options参数
+    options参数会带过来前一个页面传过来的数据。
+    data:{
+        articleId: null
+    }
+	onLoad:function(options){
+        // 生命周期函数--监听页面加载
+        console.log("log onLoad")
+        console.log(options)
+        console.log("options":options)
+        //将页面传来的数据存到变量articleId中
+        this.setData({articleId:options.id})
+	},
+logs.wxml
+    在前端显示得到的数据articleId
+    <view class="container log-list">
+        id为{{articleId}}
+    </view>
+除了通过 wx.navigateTo/wx.redirectTo进行页面的跳转，还可以通过navigator组件。
+index.wxml
+    <navigator url="../logs/logs?id=5">
+        <view class="usermotto">
+          <text class="user-motto" >文章1</text>
+        </view>
+    </navigator>
+
+
+
+
+
